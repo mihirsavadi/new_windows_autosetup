@@ -13,7 +13,8 @@
 
 .PARAMETER Task
     Run only the named stage(s) instead of obeying the toggles in config.psd1.
-    Names: prereqs apps wsl vscode office activation onedrive debloat keyboard wallpaper
+    Names: prereqs apps wsl vscode office activation onedrive debloat keyboard
+           wallpaper taskbar startup
     Example:  .\setup.ps1 -Task apps,wallpaper
 
 .PARAMETER DryRun
@@ -31,9 +32,20 @@
 .PARAMETER List
     Print the stages and whether each one is enabled, then exit.
 
+.PARAMETER IncludeInstallerRefresh
+    Also run tools\refresh-installers.ps1 in the background (concurrently with the
+    normal flow) so the offline installers in installers\ are re-downloaded and
+    updated in place. Its result is folded into the summary at the end. Skipped
+    on -DryRun; runs with -WhatIf on -TestRun.
+    (PowerShell switches use one dash: -IncludeInstallerRefresh, not --.)
+
 .EXAMPLE
     .\setup.ps1
     Full run, obeying config.psd1.
+
+.EXAMPLE
+    .\setup.ps1 -IncludeInstallerRefresh
+    Full run, and refresh the offline installers alongside it.
 
 .EXAMPLE
     .\setup.ps1 -DryRun
@@ -50,7 +62,8 @@ param(
     [switch]   $DryRun,
     [switch]   $TestRun,
     [switch]   $KeepTestArtifacts,
-    [switch]   $List
+    [switch]   $List,
+    [switch]   $IncludeInstallerRefresh
 )
 
 # Stop on the first unhandled error inside setup.ps1 itself; individual tasks
@@ -147,9 +160,10 @@ if (-not $DryRun -and -not (Test-IsAdminInline)) {
 
     # Rebuild the same command line for the elevated copy.
     $relaunch = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('"{0}"' -f $PSCommandPath))
-    if ($Task)              { $relaunch += @('-Task', ($Task -join ',')) }
-    if ($TestRun)           { $relaunch += '-TestRun' }
-    if ($KeepTestArtifacts) { $relaunch += '-KeepTestArtifacts' }
+    if ($Task)                   { $relaunch += @('-Task', ($Task -join ',')) }
+    if ($TestRun)                { $relaunch += '-TestRun' }
+    if ($KeepTestArtifacts)      { $relaunch += '-KeepTestArtifacts' }
+    if ($IncludeInstallerRefresh){ $relaunch += '-IncludeInstallerRefresh' }
 
     $hostExe = (Get-Process -Id $PID).Path   # powershell.exe running this script
     Start-Process -FilePath $hostExe -Verb RunAs -ArgumentList $relaunch
@@ -251,6 +265,34 @@ Write-Log '' 'Info'
 
 
 # ==============================================================================
+#  5b.  Optionally kick off the installer refresh in the BACKGROUND so its
+#       downloads overlap the normal stages. Collected in section 7.
+# ==============================================================================
+$refreshJob = $null
+if ($IncludeInstallerRefresh) {
+    $refreshScript = Join-Path $Root 'tools\refresh-installers.ps1'
+    if (-not (Test-Path $refreshScript)) {
+        Write-Log "-IncludeInstallerRefresh: tools\refresh-installers.ps1 not found - skipping." 'Warn'
+    }
+    elseif ($mode -eq 'DryRun') {
+        Write-Log "WHATIF  would refresh installers\ in the background via tools\refresh-installers.ps1" 'WhatIf'
+    }
+    else {
+        $whatIfArg = ($mode -eq 'TestRun')   # TestRun -> refresh downloads but replaces nothing
+        Write-Log ("Starting installer refresh in the background{0}..." -f $(if($whatIfArg){' (-WhatIf)'}else{''})) 'Step'
+        $refreshJob = Start-Job -Name 'nwas-refresh' -ScriptBlock {
+            param($script, $useWhatIf)
+            # A background job is a fresh powershell.exe and does NOT inherit the
+            # -ExecutionPolicy Bypass we were launched with, so set it for this
+            # process (no admin needed, scoped to the job).
+            Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+            if ($useWhatIf) { & $script -WhatIf } else { & $script }
+        } -ArgumentList $refreshScript, $whatIfArg
+    }
+}
+
+
+# ==============================================================================
 #  6.  Run each stage, catching its errors so the run continues
 # ==============================================================================
 foreach ($stage in $stagesToRun) {
@@ -271,6 +313,27 @@ foreach ($stage in $stagesToRun) {
         Write-Log ("Stage '{0}' failed: {1}" -f $stage, $_.Exception.Message) 'Error'
         Write-Log ($_.ScriptStackTrace) 'Error'
         Add-Result -Stage $stage -Item '(stage)' -Status 'Failed' -Detail $_.Exception.Message
+    }
+}
+
+
+# ==============================================================================
+#  6b.  Collect the background installer refresh, if one was started.
+# ==============================================================================
+if ($refreshJob) {
+    Write-Log '' 'Info'
+    Write-Log '===== installer refresh (background job) =====' 'Head'
+    Wait-Job $refreshJob | Out-Null
+    # Replay the job's console output into our log line-for-line.
+    Receive-Job $refreshJob | ForEach-Object { Write-Log ('  ' + $_) 'Info' }
+    $jobState = $refreshJob.State
+    Remove-Job $refreshJob -Force -ErrorAction SilentlyContinue
+    Add-Result -Stage 'refresh' -Item 'installers\' -Status $(if ($jobState -eq 'Completed') { 'Done' } else { 'Failed' }) -Detail ("job {0}" -f $jobState)
+    if ($jobState -eq 'Completed') {
+        Write-Log 'Installer refresh finished. Run  git status installers  to see if anything changed.' 'Good'
+    }
+    else {
+        Write-Log ("Installer refresh job ended: {0}" -f $jobState) 'Warn'
     }
 }
 

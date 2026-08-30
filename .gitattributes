@@ -9,9 +9,16 @@
 *.cmd   text eol=crlf
 
 # Never touch these.
-*.exe   binary
-*.msi   binary
 *.jpg   binary
 *.jpeg  binary
 *.png   binary
 *.ico   binary
+
+# ------------------------------------------------------------------------------
+#  Git LFS: the offline installers under installers\ are large binaries, stored
+#  via LFS so the main repo history stays small. Everything in installers\ is
+#  LFS-tracked EXCEPT the README.
+# ------------------------------------------------------------------------------
+installers/**            filter=lfs diff=lfs merge=lfs -text
+installers/README.md     !filter !diff !merge text eol=lf
+installers/Win11Debloat/** !filter !diff !merge

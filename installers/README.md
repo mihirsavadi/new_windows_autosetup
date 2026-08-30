@@ -1,56 +1,38 @@
 # installers\
 
-Offline GUI installers, kept here so a fresh machine can still install these apps
-if winget is unavailable or a package fails.
+Offline **fallback** installers. `tasks\10-apps.ps1` always tries `winget` first;
+one of these only runs if that app's winget install *fails* on the day (and then
+it opens as a visible GUI, never silent). If winget succeeds, these are untouched.
 
-**When they run:** `tasks\10-apps.ps1` only touches these if a winget install
-*fails* (or if you set `PreferOffline = $true` in `config.psd1`). It then launches
-**all** the needed ones **at once, with their normal GUIs**, for you to click
-through. Nothing here is ever run silently.
+Only apps where winget has a real reason to be distrusted get one:
 
-`config.psd1` -> `OfflineInstallerSearchPaths` also lists `%USERPROFILE%\Downloads`,
-so files there are picked up too without copying them in.
+| File | App | Why kept |
+|---|---|---|
+| `Logitech.OptionsPlus.installer.exe` | Logi Options+ | winget frequently fails here with an installer-hash mismatch |
+| `cjpais.Handy.installer.exe` | Handy | winget package is community-maintained, not by the Handy devs |
+| `AirVPN.Eddie.installer.exe` | Eddie / AirVPN | AirVPN's own server is the only source and can be slow |
+| `Ubiquiti.WiFimanDesktop.installer.exe` | WiFiman | niche app, Ubiquiti's winget presence is an afterthought |
+| `AutoHotkey.AutoHotkey.installer.exe` | AutoHotkey v2 | `tasks\70-keyboard.ps1` depends on it; 3 MB to guarantee it |
+| `Voidstar.FilePilot.installer.exe` | File Pilot | fast-moving 0.x beta from a solo dev; 2.5 MB |
 
-## File -> app
+Filenames are `<winget-id>.installer.<ext>` on purpose so the refresh tool can
+find and overwrite them.
 
-| File | App | Re-download from |
-|------|-----|-----------------|
-| `DropboxInstaller.exe` | Dropbox | https://www.dropbox.com/install |
-| `BraveBrowserSetup-BRV011.exe` | Brave browser | https://brave.com/download/ |
-| `Obsidian-1.13.7.exe` | Obsidian | https://obsidian.md/download |
-| `SpotifySetup.exe` | Spotify | https://www.spotify.com/download/windows/ |
-| `WhatsApp Installer.exe` | WhatsApp | https://www.whatsapp.com/download |
-| `DiscordSetup.exe` | Discord | https://discord.com/download |
-| `logioptionsplus_installer.exe` | Logi Options+ | https://www.logitech.com/software/logi-options-plus.html |
-| `qbittorrent_5.2.3_x64_setup.exe` | qBittorrent | https://www.qbittorrent.org/download |
-| `Y21C_C1_ULWT_PP-inst-E1.EXE` | Brother printer full driver (likely) | https://support.brother.com -> your model -> "Full Driver & Software Package" |
-| `Bitwarden-Installer-2026.8.0.exe` | Bitwarden | https://bitwarden.com/download/ |
-| `PrusaSlicer-2.9.6-setup.exe` | PrusaSlicer | https://www.prusa3d.com/prusaslicer/ |
-| `EditorV11.x64.msi` | PDF-XChange Editor | https://www.pdf-xchange.com/product/pdf-xchange-editor |
-| `VSCodeUserSetup-x64-1.135.0.exe` | Visual Studio Code | https://code.visualstudio.com/download |
-| `Handy_0.9.4_x64-setup.exe` | Handy | https://handy.computer/download |
-| `FPilot.exe` | File Pilot | https://filepilot.tech/download |
-| `eddie-ui_2.26.2_windows_x64_installer.exe` | Eddie (AirVPN) | https://airvpn.org/windows/ |
-| `Fusion Client Downloader.exe` | Autodesk Fusion 360 | https://www.autodesk.com/products/fusion-360 (sign-in required) |
-| `AutoHotkey_2.0.27_setup.exe` | AutoHotkey v2 | https://www.autohotkey.com/ |
-| `OfficeSetup.exe` | Microsoft 365 Apps (Click-to-Run) | https://www.office.com |
+## Keeping them current
 
-## No offline copy (winget only)
+```
+.\tools\refresh-installers.ps1            # re-download all via `winget download`, replace if changed
+.\tools\refresh-installers.ps1 -WhatIf    # show what would change, touch nothing
+.\tools\refresh-installers.ps1 -Only handy,logioptions
+```
 
-`Git.Git`, `Anthropic.ClaudeCode`, `RandyRants.SharpKeys`, `Python.Python.3.14` -
-these install from winget only. If you want offline copies, grab:
-Git (https://git-scm.com/download/win), SharpKeys
-(https://github.com/randyrants/sharpkeys/releases), Python
-(https://www.python.org/downloads/windows/).
+Then `git add installers && git commit && git push`. The binaries are Git LFS
+objects (see `.gitattributes`).
 
-## Not copied from Downloads (not on the app list)
+## Committed via Git LFS
 
-`calibre-64bit-*.msi`, `SteamSetup.exe`, `wifiman-desktop-*.exe`,
-`Framework_Laptop_13_*driver_bundle*.exe`, `Framework_Laptop_13_*BIOS*.exe`.
-Drop any of these in here and add a matching
-entry to `Apps` in `config.psd1` if you want them handled automatically.
+Everything here except this README. Total ~126 MB across 6 files.
 
-## Win11Debloat\
+## `Win11Debloat\`
 
-Created at runtime by `tasks\60-debloat.ps1` (it downloads and unzips
-Raphire/Win11Debloat here, then opens its menu).
+Created at runtime by `tasks\60-debloat.ps1`; git-ignored.

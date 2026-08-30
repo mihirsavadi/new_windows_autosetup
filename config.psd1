@@ -183,28 +183,35 @@
     #     NeedsSignin $true  -> on success, remind you to log in / enter a licence
     #     Note        one line shown next to the app in the end-of-run reminders
     # =========================================================================
+    #  NOTE: every app below is on winget. 'Offline' is only kept for the few
+    #  where winget has actually been flaky (Logi Options+ hash mismatches, the
+    #  community-maintained Handy package) or where a local full installer is
+    #  cheap insurance. The online-stub installers (Office/Dropbox/Spotify/etc.)
+    #  were dropped - they just re-download the app, so they add nothing.
     Apps = @(
-        @{ Key='dropbox';     Name='Dropbox';                Id='Dropbox.Dropbox';                   Offline='DropboxInstaller.exe';                 NeedsSignin=$true;  Note='Sign in to start syncing.' }
-        @{ Key='brave';       Name='Brave browser';          Id='Brave.Brave';                       Offline='BraveBrowserSetup-*.exe';             NeedsSignin=$true;  Note='Sign in / import bookmarks; also on the taskbar (tasks\85-taskbar.ps1).' }
-        @{ Key='obsidian';    Name='Obsidian';               Id='Obsidian.Obsidian';                 Offline='Obsidian-*.exe';                       NeedsSignin=$true;  Note='Open your vault; sign in to Obsidian Sync if you use it.' }
-        @{ Key='spotify';     Name='Spotify';                Id='Spotify.Spotify';                   Offline='SpotifySetup.exe';                     NeedsSignin=$true;  Note='Log in. winget install can fail when elevated - the offline GUI is the fallback.' }
-        @{ Key='whatsapp';    Name='WhatsApp';               Id='9NKSQGP7F2NH'; Source='msstore';    Offline='WhatsApp Installer.exe';               Interactive=$true;  Note='Finish from Microsoft Store if prompted, then link your phone.' }
-        @{ Key='discord';     Name='Discord';                Id='Discord.Discord';                   Offline='DiscordSetup.exe';                     NeedsSignin=$true;  Note='Log in.' }
-        @{ Key='logioptions'; Name='Logi Options+';          Id='Logitech.OptionsPlus';              Offline='logioptionsplus_installer.exe';                            Note='If winget reports a hash mismatch the GUI installer is used instead.' }
-        @{ Key='qbittorrent'; Name='qBittorrent';            Id='qBittorrent.qBittorrent';           Offline='qbittorrent_*_setup.exe' }
-        @{ Key='brother';     Name='Brother printer driver'; ManualOnly=$true;                                                                                          Note='Winget only has the scan-only "iPrint&Scan" utility. Install the full "Full Driver & Software Package" for your model from https://support.brother.com  (installers\Y21C_C1_ULWT_PP-inst-E1.EXE is likely it).' }
-        @{ Key='bitwarden';   Name='Bitwarden';              Id='Bitwarden.Bitwarden';               Offline='Bitwarden-Installer-*.exe';            NeedsSignin=$true;  Note='Log in and unlock your vault.' }
-        @{ Key='prusaslicer'; Name='PrusaSlicer';            Id='Prusa3D.PrusaSlicer';               Offline='PrusaSlicer-*-setup.exe' }
-        @{ Key='pdfxchange';  Name='PDF-XChange Editor';     Id='TrackerSoftware.PDF-XChangeEditor';  Offline='EditorV11.x64.msi';                   NeedsSignin=$true;  Note='Enter your licence key, or keep using the free feature set.' }
-        @{ Key='vscode';      Name='Visual Studio Code';     Id='Microsoft.VisualStudioCode';        Offline='VSCodeUserSetup-x64-*.exe';            NeedsSignin=$true;  Note='Sign in to Settings Sync. tasks\20-vscode.ps1 pre-loads your extensions and settings.json.' }
-        @{ Key='handy';       Name='Handy (speech-to-text)'; Id='cjpais.Handy';                      Offline='Handy_*_x64-setup.exe';                                   Note='Community-maintained winget package; offline installer is the fallback.' }
-        @{ Key='filepilot';   Name='File Pilot';             Id='Voidstar.FilePilot';                Offline='FPilot.exe' }
-        @{ Key='eddie';       Name='Eddie - AirVPN';         Id='AirVPN.Eddie';                      Offline='eddie-ui_*_windows_x64_installer.exe'; NeedsSignin=$true;  Note='Enter your AirVPN credentials or import your .ovpn profile.' }
-        @{ Key='fusion360';   Name='Autodesk Fusion 360';    Id='Autodesk.Fusion';                   Offline='Fusion Client Downloader.exe';         Interactive=$true;  Note='The installer is a downloader - finish it and sign in with your Autodesk account.' }
-        @{ Key='autohotkey';  Name='AutoHotkey v2';          Id='AutoHotkey.AutoHotkey';             Offline='AutoHotkey_*_setup.exe';                                   Note='Used by tasks\70-keyboard.ps1.' }
-        @{ Key='sharpkeys';   Name='SharpKeys';              Id='RandyRants.SharpKeys';                                                                                 Note='Installed for reference; the key swap itself is done by tasks\70-keyboard.ps1 via the registry.' }
+        @{ Key='dropbox';     Name='Dropbox';                Id='Dropbox.Dropbox';                                                                    NeedsSignin=$true;  Note='Sign in to start syncing.' }
+        @{ Key='brave';       Name='Brave browser';          Id='Brave.Brave';                                                                        NeedsSignin=$true;  Note='Sign in / import bookmarks; also pinned to the taskbar (tasks\85-taskbar.ps1).' }
+        @{ Key='obsidian';    Name='Obsidian';               Id='Obsidian.Obsidian';                                                                  NeedsSignin=$true;  Note='Open your vault; sign in to Obsidian Sync if you use it.' }
+        @{ Key='spotify';     Name='Spotify';                Id='Spotify.Spotify';                                                                    NeedsSignin=$true;  Note='Log in. (winget can fail if run elevated - just re-run  .\setup.ps1 -Task apps  unelevated, or install by hand.)' }
+        @{ Key='whatsapp';    Name='WhatsApp';               Id='9NKSQGP7F2NH'; Source='msstore';                                                     Interactive=$true;  Note='Finish from the Microsoft Store if prompted, then link your phone.' }
+        @{ Key='discord';     Name='Discord';                Id='Discord.Discord';                                                                    NeedsSignin=$true;  Note='Log in.' }
+        @{ Key='logioptions'; Name='Logi Options+';          Id='Logitech.OptionsPlus';              Offline='Logitech.OptionsPlus.installer.exe';                        Note='winget often fails here with an installer-hash mismatch - the offline GUI installer is the fallback.' }
+        @{ Key='qbittorrent'; Name='qBittorrent';            Id='qBittorrent.qBittorrent' }
+        @{ Key='brother';     Name='Brother iPrint&Scan';    Id='Brother.iPrintScan';                                                                                    Note='Scan/print utility. Add your printer inside the app (needs it on the same network).' }
+        @{ Key='bitwarden';   Name='Bitwarden';              Id='Bitwarden.Bitwarden';                                                                NeedsSignin=$true;  Note='Log in and unlock your vault.' }
+        @{ Key='prusaslicer'; Name='PrusaSlicer';            Id='Prusa3D.PrusaSlicer' }
+        @{ Key='pdfxchange';  Name='PDF-XChange Editor';     Id='TrackerSoftware.PDF-XChangeEditor';                                                  NeedsSignin=$true;  Note='Enter your licence key, or keep using the free feature set.' }
+        @{ Key='vscode';      Name='Visual Studio Code';     Id='Microsoft.VisualStudioCode';                                                         NeedsSignin=$true;  Note='Sign in to Settings Sync. tasks\20-vscode.ps1 pre-loads your extensions and settings.json.' }
+        @{ Key='handy';       Name='Handy (speech-to-text)'; Id='cjpais.Handy';                      Offline='cjpais.Handy.installer.exe';                                Note='winget package is community-maintained (not by the Handy devs) so it can lag/break - offline installer is the fallback.' }
+        @{ Key='filepilot';   Name='File Pilot';             Id='Voidstar.FilePilot';                Offline='Voidstar.FilePilot.installer.exe' }
+        @{ Key='eddie';       Name='Eddie - AirVPN';         Id='AirVPN.Eddie';                      Offline='AirVPN.Eddie.installer.exe';           NeedsSignin=$true;  Note='Enter your AirVPN credentials or import your .ovpn profile.' }
+        @{ Key='fusion360';   Name='Autodesk Fusion 360';    Id='Autodesk.Fusion';                                                                    Interactive=$true;  Note='winget runs Autodesk''s downloader stub - finish it and sign in with your Autodesk account.' }
+        @{ Key='wifiman';     Name='WiFiman Desktop';        Id='Ubiquiti.WiFimanDesktop';           Offline='Ubiquiti.WiFimanDesktop.installer.exe' }
+        @{ Key='steam';       Name='Steam';                  Id='Valve.Steam';                                                                        NeedsSignin=$true;  Note='Log in.' }
+        @{ Key='autohotkey';  Name='AutoHotkey v2';          Id='AutoHotkey.AutoHotkey';             Offline='AutoHotkey.AutoHotkey.installer.exe';                       Note='Used by tasks\70-keyboard.ps1 - offline copy guarantees it is available for that stage.' }
+        @{ Key='sharpkeys';   Name='SharpKeys';              Id='RandyRants.SharpKeys';                                                                                  Note='Installed for reference; the key swap itself is done by tasks\70-keyboard.ps1 via the registry.' }
         @{ Key='git';         Name='Git';                    Id='Git.Git' }
-        @{ Key='claudecode';  Name='Claude Code CLI';        Id='Anthropic.ClaudeCode';                                                             NeedsSignin=$true;  Note='Run  claude  in a terminal and sign in.' }
+        @{ Key='claudecode';  Name='Claude Code CLI';        Id='Anthropic.ClaudeCode';                                                               NeedsSignin=$true;  Note='Run  claude  in a terminal and sign in.' }
         @{ Key='python';      Name='Python 3.14';            Id='Python.Python.3.14'; Scope='machine'; Override='/quiet PrependPath=1 Include_test=0 InstallAllUsers=1'; Note='Installed for all users and added to PATH; the Microsoft Store python stub is disabled so this one wins.' }
     )
 }

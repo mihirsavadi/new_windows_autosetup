@@ -44,6 +44,7 @@ is also saved to a timestamped `.log` in this folder.
 | `.\setup.ps1 -TestRun` | Really downloads installers/scripts into a temp folder (deleted at the end) to prove the URLs and fallbacks work, but executes nothing and changes nothing. |
 | `.\setup.ps1 -TestRun -KeepTestArtifacts` | Same, but keep the temp download folder. |
 | `.\setup.ps1 -Task apps,wallpaper` | Run only the named stage(s). |
+| `.\setup.ps1 -IncludeInstallerRefresh` | Also re-download the offline installers in `installers\` (in the background, concurrent with the run) and update them in place. Then `git add installers && git commit && git push` if anything changed. |
 
 Stage names: `prereqs apps wsl vscode office activation onedrive debloat keyboard wallpaper taskbar startup`
 (`prereqs` always runs first).
@@ -55,7 +56,7 @@ Stage names: `prereqs apps wsl vscode office activation onedrive debloat keyboar
 | Stage | File | Summary |
 |-------|------|---------|
 | prereqs | `tasks\00-prereqs.ps1` | Check winget is present; refresh its sources. |
-| apps | `tasks\10-apps.ps1` | Install the `Apps` list from `config.psd1` via winget. Check-before-install. Failures queue the matching offline GUI installer; all queued GUIs open together at the end. |
+| apps | `tasks\10-apps.ps1` | Install the `Apps` list from `config.psd1`. Per app: if already present (`winget list` match or a configured exe path) -> log `SKIP` and do nothing else; otherwise `winget install` (silent, `--no-upgrade`); if that fails and the app has an `Offline` file, queue it - all queued GUI installers open together at the end. |
 | wsl | `tasks\15-wsl.ps1` | `wsl --install --no-launch` + the distro in `WSLDistro` (default `Ubuntu-26.04`). Needs a reboot; first launch asks you to make a UNIX user. |
 | vscode | `tasks\20-vscode.ps1` | Install the extensions in `vscode\extensions.txt`; copy `vscode\settings.json` if the machine has none. Reminds you to sign in to Settings Sync. |
 | office | `tasks\30-office.ps1` | Install Microsoft 365 Apps (`OfficeMethod = 'winget'` or `'odt'`). |
@@ -77,6 +78,7 @@ config.psd1          <-- the only file you normally edit
 setup_<timestamp>.log written on every run (this folder)
 lib\common.ps1       shared helper functions
 tasks\               one file per stage (run in order, or pick with -Task)
+tools\refresh-installers.ps1   re-download installers\ via `winget download`, replace if changed
 assets\              skyewallpaper.jpg (your wallpaper)
 ahk\                 your AutoHotkey scripts  (ctrl_tab_remap_and_instructions.ahk)
 ahk\compiled\        compiled .exe fallback (not normally used)
