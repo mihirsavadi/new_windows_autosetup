@@ -1,0 +1,17 @@
+# Normalise line endings so the LF/CRLF warning stops and checkouts are stable.
+* text=auto eol=lf
+
+# Windows-native script types keep CRLF in the working tree.
+*.ps1   text eol=crlf
+*.psd1  text eol=crlf
+*.ahk   text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Never touch these.
+*.exe   binary
+*.msi   binary
+*.jpg   binary
+*.jpeg  binary
+*.png   binary
+*.ico   binary

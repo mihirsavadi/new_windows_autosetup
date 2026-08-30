@@ -1,0 +1,16 @@
+# Run logs (one per run, timestamped)
+setup_*.log
+
+# Offline installers are large; keep the folder + its docs, ignore the binaries.
+installers/*
+!installers/README.md
+!installers/.gitkeep
+
+# Win11Debloat download unpacked at runtime
+installers/Win11Debloat/
+
+# TestRun scratch (only ever created under %TEMP%, but just in case)
+nwas-testrun-*/
+
+# Per-machine state (startup baseline snapshot) - local, not shared
+.state/

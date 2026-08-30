@@ -1,0 +1,45 @@
+<!--
+  office\configuration.xml  --  used ONLY when config.psd1 has  OfficeMethod = 'odt'
+  ================================================================================
+  This is a Microsoft "Office Deployment Tool" configuration file. tasks\30-office.ps1
+  installs the ODT (winget: Microsoft.OfficeDeploymentTool) and then runs:
+        setup.exe /configure office\configuration.xml
+
+  Edit before use if you want to:
+    * install fewer apps    -> add <ExcludeApp .../> lines (see the commented ones)
+    * use a different track  -> change Channel="Current" to "MonthlyEnterprise",
+                                "SemiAnnual", or (perpetual) "PerpetualVL2024"
+    * add languages         -> add more <Language .../> lines
+
+  AUTOACTIVATE is 0 on purpose: activation is handled separately by
+  tasks\40-activation.ps1 (MAS /Ohook).
+-->
+<Configuration>
+
+  <Add OfficeClientEdition="64" Channel="Current">
+    <Product ID="O365ProPlusRetail">
+      <Language ID="en-US" />
+      <!-- Uncomment any app you do NOT want installed:
+      <ExcludeApp ID="Access" />
+      <ExcludeApp ID="Groove" />       (old OneDrive for Business)
+      <ExcludeApp ID="Lync" />         (Skype for Business)
+      <ExcludeApp ID="OneDrive" />
+      <ExcludeApp ID="OneNote" />
+      <ExcludeApp ID="Outlook" />
+      <ExcludeApp ID="Publisher" />
+      -->
+      <ExcludeApp ID="Groove" />
+      <ExcludeApp ID="Lync" />
+    </Product>
+  </Add>
+
+  <Property Name="SharedComputerLicensing" Value="0" />
+  <Property Name="PinIconsToTaskbar" Value="FALSE" />
+  <Property Name="AUTOACTIVATE" Value="0" />
+
+  <Updates Enabled="TRUE" />
+  <RemoveMSI />
+
+  <Display Level="None" AcceptEULA="TRUE" />
+
+</Configuration>
