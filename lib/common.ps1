@@ -366,6 +366,29 @@ function Set-RebootNeeded {
 
 
 # ------------------------------------------------------------------------------
+#  Remove-AppExecutionAlias
+#  Delete the given 0-byte "App Execution Alias" stub(s) from
+#  %LOCALAPPDATA%\Microsoft\WindowsApps . These are the reparse points that make
+#  e.g. `python` open the Microsoft Store instead of a real install; deleting one
+#  is exactly what turning its switch off in Settings > Apps > Advanced app
+#  settings > App execution aliases does. Safe: user-owned, recreated only if you
+#  re-enable it or reinstall the Store app.
+# ------------------------------------------------------------------------------
+function Remove-AppExecutionAlias {
+    param([Parameter(Mandatory)][string[]] $Name)
+
+    $dir = Join-Path $env:LOCALAPPDATA 'Microsoft\WindowsApps'
+    foreach ($exe in $Name) {
+        $stub = Join-Path $dir $exe
+        if (-not (Test-Path $stub)) { continue }
+        Invoke-Change ("remove Store app-execution-alias {0}" -f $exe) {
+            Remove-Item -LiteralPath $stub -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+
+# ------------------------------------------------------------------------------
 #  Set-RegistryValue
 #  Create the key path if missing, then set one value. Wrapped in Invoke-Change
 #  so it is a no-op (just logged) in DryRun/TestRun.

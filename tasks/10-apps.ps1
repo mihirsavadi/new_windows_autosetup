@@ -37,6 +37,12 @@ foreach ($app in $apps) {
         continue
     }
 
+    # Kill any Store app-execution-alias stubs this app asks us to (e.g. python.exe)
+    # - do it every run, whether the app installs, skips, or fails.
+    if ($app.DisableAppExecutionAlias) {
+        Remove-AppExecutionAlias -Name $app.DisableAppExecutionAlias
+    }
+
     # --- 2. Already installed? -------------------------------------------
     if (Test-AppInstalled -App $app) {
         Add-Result -Stage 'apps' -Item $name -Status 'Skipped' -Detail 'already installed'

@@ -179,6 +179,8 @@
     #     Scope       'machine' or 'user' - only set if the package needs it
     #     InstallerType  force a specific installer, e.g. 'msi' (winget --installer-type)
     #     Override    extra args passed to the app's own installer via winget --override
+    #     DisableAppExecutionAlias  @('x.exe',...) - after handling this app, delete
+    #                 those Microsoft-Store alias stubs from %LOCALAPPDATA%\Microsoft\WindowsApps
     #     Offline     filename (wildcards ok) of the GUI installer to fall back to
     #     ManualOnly  $true  -> never attempt; just print it in the "install by hand" list
     #     Interactive $true  -> attempt, but ALWAYS remind you to finish it by hand
@@ -215,7 +217,8 @@
         @{ Key='git';         Name='Git';                    Id='Git.Git' }
         @{ Key='nodejs';      Name='Node.js LTS';            Id='OpenJS.NodeJS.LTS'; Scope='machine';                                                                     Note='Includes npm + corepack; added to PATH for all users.' }
         @{ Key='pwsh';        Name='PowerShell 7';           Id='Microsoft.PowerShell'; Scope='machine'; InstallerType='msi';                                              Note='Installed to Program Files (msi, not the Store build). tasks\25-terminal.ps1 makes it the default profile in Windows Terminal.' }
+        @{ Key='ffmpeg';      Name='FFmpeg';                 Id='Gyan.FFmpeg';                                                                                            Note='Portable build; winget puts ffmpeg/ffplay/ffprobe on PATH via its Links folder. Open a new terminal after install.' }
         @{ Key='claudecode';  Name='Claude Code CLI';        Id='Anthropic.ClaudeCode';                                                               NeedsSignin=$true;  Note='Run  claude  in a terminal and sign in.' }
-        @{ Key='python';      Name='Python 3.14';            Id='Python.Python.3.14'; Scope='machine'; Override='/quiet PrependPath=1 Include_test=0 InstallAllUsers=1'; Note='Installed for all users and added to PATH (pip included); the Microsoft Store python stub is disabled so this one wins.' }
+        @{ Key='python';      Name='Python 3.14';            Id='Python.Python.3.14'; Scope='machine'; Override='/quiet PrependPath=1 Include_test=0 InstallAllUsers=1'; DisableAppExecutionAlias=@('python.exe','python3.exe'); Note='Installed for all users and added to PATH (pip included). Also removes the Microsoft Store python.exe / python3.exe App Execution Alias stubs so typing "python" runs this, not the Store. Open a new terminal afterwards.' }
     )
 }
