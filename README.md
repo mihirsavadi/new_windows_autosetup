@@ -46,7 +46,7 @@ is also saved to a timestamped `.log` in this folder.
 | `.\setup.ps1 -Task apps,wallpaper` | Run only the named stage(s). |
 | `.\setup.ps1 -IncludeInstallerRefresh` | Also re-download the offline installers in `installers\` (in the background, concurrent with the run) and update them in place. Then `git add installers && git commit && git push` if anything changed. |
 
-Stage names: `prereqs apps wsl vscode office activation onedrive debloat keyboard wallpaper taskbar startup`
+Stage names: `prereqs apps wsl vscode terminal office activation onedrive debloat keyboard wallpaper taskbar startup`
 (`prereqs` always runs first).
 
 ---
@@ -59,6 +59,7 @@ Stage names: `prereqs apps wsl vscode office activation onedrive debloat keyboar
 | apps | `tasks\10-apps.ps1` | Install the `Apps` list from `config.psd1`. Per app: if already present (`winget list` match or a configured exe path) -> log `SKIP` and do nothing else; otherwise `winget install` (silent, `--no-upgrade`); if that fails and the app has an `Offline` file, queue it - all queued GUI installers open together at the end. |
 | wsl | `tasks\15-wsl.ps1` | `wsl --install --no-launch` + the distro in `WSLDistro` (default `Ubuntu-26.04`). Needs a reboot; first launch asks you to make a UNIX user. |
 | vscode | `tasks\20-vscode.ps1` | Install the extensions in `vscode\extensions.txt`; copy `vscode\settings.json` if the machine has none. Reminds you to sign in to Settings Sync. |
+| terminal | `tasks\25-terminal.ps1` | Set PowerShell 7's profile as the Windows Terminal default (`defaultProfile` in its `settings.json`, targeted edit + `.bak`). |
 | office | `tasks\30-office.ps1` | Install Microsoft 365 Apps (`OfficeMethod = 'winget'` or `'odt'`). |
 | activation | `tasks\40-activation.ps1` | Run MAS (`https://get.activated.win`) with `/HWID` and/or `/Ohook` `/S`. Optional temporary Defender exclusion around this step. |
 | onedrive | `tasks\50-onedrive.ps1` | Re-point Desktop/Documents/Pictures/... from the OneDrive copy back to `C:\Users\<you>\...` (registry). By default (`UninstallOneDrive = $true`) also kills + uninstalls OneDrive, removes its folder / scheduled tasks / startup entry / Explorer sidebar item. |

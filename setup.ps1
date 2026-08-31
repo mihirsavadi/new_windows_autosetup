@@ -13,8 +13,8 @@
 
 .PARAMETER Task
     Run only the named stage(s) instead of obeying the toggles in config.psd1.
-    Names: prereqs apps wsl vscode office activation onedrive debloat keyboard
-           wallpaper taskbar startup
+    Names: prereqs apps wsl vscode terminal office activation onedrive debloat
+           keyboard wallpaper taskbar startup
     Example:  .\setup.ps1 -Task apps,wallpaper
 
 .PARAMETER DryRun
@@ -100,6 +100,7 @@ $StageToggle = [ordered]@{
     apps       = 'InstallApps'
     wsl        = 'InstallWSL'
     vscode     = 'ConfigureVSCode'
+    terminal   = 'ConfigureTerminal'
     office     = 'InstallOffice'
     activation = 'Activate'
     onedrive   = 'FixOneDrive'

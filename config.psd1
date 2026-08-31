@@ -40,6 +40,7 @@
     InstallApps          = $true    # tasks\10-apps.ps1      - winget app installs
     InstallWSL           = $true    # tasks\15-wsl.ps1       - WSL2 + Ubuntu
     ConfigureVSCode      = $true    # tasks\20-vscode.ps1    - extensions + settings
+    ConfigureTerminal    = $true    # tasks\25-terminal.ps1  - PowerShell 7 as the Windows Terminal default
     InstallOffice        = $true    # tasks\30-office.ps1    - Microsoft 365 Apps
     Activate             = $true    # tasks\40-activation.ps1 - MAS (massgrave)
     FixOneDrive          = $true    # tasks\50-onedrive.ps1  - un-redirect user folders (+remove OneDrive, see below)
@@ -176,6 +177,7 @@
     #     Id          winget package id  (omit for ManualOnly apps)
     #     Source      'winget' (default) or 'msstore'
     #     Scope       'machine' or 'user' - only set if the package needs it
+    #     InstallerType  force a specific installer, e.g. 'msi' (winget --installer-type)
     #     Override    extra args passed to the app's own installer via winget --override
     #     Offline     filename (wildcards ok) of the GUI installer to fall back to
     #     ManualOnly  $true  -> never attempt; just print it in the "install by hand" list
@@ -211,7 +213,9 @@
         @{ Key='autohotkey';  Name='AutoHotkey v2';          Id='AutoHotkey.AutoHotkey';             Offline='AutoHotkey.AutoHotkey.installer.exe';                       Note='Used by tasks\70-keyboard.ps1 - offline copy guarantees it is available for that stage.' }
         @{ Key='sharpkeys';   Name='SharpKeys';              Id='RandyRants.SharpKeys';                                                                                  Note='Installed for reference; the key swap itself is done by tasks\70-keyboard.ps1 via the registry.' }
         @{ Key='git';         Name='Git';                    Id='Git.Git' }
+        @{ Key='nodejs';      Name='Node.js LTS';            Id='OpenJS.NodeJS.LTS'; Scope='machine';                                                                     Note='Includes npm + corepack; added to PATH for all users.' }
+        @{ Key='pwsh';        Name='PowerShell 7';           Id='Microsoft.PowerShell'; Scope='machine'; InstallerType='msi';                                              Note='Installed to Program Files (msi, not the Store build). tasks\25-terminal.ps1 makes it the default profile in Windows Terminal.' }
         @{ Key='claudecode';  Name='Claude Code CLI';        Id='Anthropic.ClaudeCode';                                                               NeedsSignin=$true;  Note='Run  claude  in a terminal and sign in.' }
-        @{ Key='python';      Name='Python 3.14';            Id='Python.Python.3.14'; Scope='machine'; Override='/quiet PrependPath=1 Include_test=0 InstallAllUsers=1'; Note='Installed for all users and added to PATH; the Microsoft Store python stub is disabled so this one wins.' }
+        @{ Key='python';      Name='Python 3.14';            Id='Python.Python.3.14'; Scope='machine'; Override='/quiet PrependPath=1 Include_test=0 InstallAllUsers=1'; Note='Installed for all users and added to PATH (pip included); the Microsoft Store python stub is disabled so this one wins.' }
     )
 }

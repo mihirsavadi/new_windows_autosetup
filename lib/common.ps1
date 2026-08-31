@@ -234,9 +234,10 @@ function Invoke-Winget {
         '--disable-interactivity'
         '--no-upgrade'
     )
-    if ($App.Source)   { $arguments += @('--source', $App.Source) }
-    if ($App.Scope)    { $arguments += @('--scope', $App.Scope) }
-    if ($App.Override) { $arguments += @('--override', $App.Override) }
+    if ($App.Source)        { $arguments += @('--source', $App.Source) }
+    if ($App.Scope)         { $arguments += @('--scope', $App.Scope) }
+    if ($App.InstallerType) { $arguments += @('--installer-type', $App.InstallerType) }
+    if ($App.Override)      { $arguments += @('--override', $App.Override) }
 
     Write-Log ('winget ' + ($arguments -join ' ')) 'Info'
 
