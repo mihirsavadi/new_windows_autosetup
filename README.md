@@ -1,12 +1,9 @@
-Mihir Savadi
-30th August 2026
-
 # New Windows Auto Setup
 
-A PowerShell toolkit that does the repetitive parts of setting up a fresh Windows
-install: install apps + WSL2 + Office, activate Windows/Office (massgrave), undo
-OneDrive's folder redirection, open a debloat tool, remap keys + wire up
-AutoHotkey, and set the wallpaper.
+A PowerShell toolkit that does the repetitive parts of setting up a fresh Windows install: install
+apps + WSL2 + Office, activate Windows/Office (massgrave), undo OneDrive's folder redirection, open
+a debloat tool, remap keys + wire up AutoHotkey, and set the wallpaper. All the programs and tasks
+are personal to my taste, but can be parameterized and varied as you please.
 
 Everything is driven by one settings file (`config.psd1`) and everything printed
 is also saved to a timestamped `.log` in this folder.
