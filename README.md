@@ -107,9 +107,6 @@ installers\          offline GUI installers + a file->app map (installers\README
   required.
 * `Handy` uses a community-maintained winget package; if it breaks, the offline
   installer in `installers\` is the fallback.
-* `LosslessCut` also uses a community-maintained winget package (`ch.LosslessCut` -
-  the upstream dev publishes no installer, only a 7z portable). If winget breaks,
-  grab the zip from <https://github.com/mifi/lossless-cut/releases>.
 * Spotify's winget install can fail when run elevated - that just triggers the
   offline `SpotifySetup.exe` fallback, which is fine.
 * This folder is inside Dropbox; the `.log` files and `installers\` will sync. That
