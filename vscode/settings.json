@@ -16,27 +16,6 @@
     "latex-workshop.view.pdf.viewer": "tab",
     "latex-workshop.latex.autoBuild.interval": 1,
     "latex-workshop.latex.autoBuild.run": "onSave",
-    "latex-workshop.latex.recipe.default": "tectonic",
-    "latex-workshop.latex.recipes": [
-        {
-            "name": "tectonic",
-            "tools": [
-                "tectonic"
-            ]
-        }
-    ],
-    "latex-workshop.latex.tools": [
-        {
-            "name": "tectonic",
-            "command": "tectonic",
-            "args": [
-                "--synctex",
-                "--keep-logs",
-                "--keep-intermediates",
-                "%DOC%.tex"
-            ]
-        }
-    ],
     "cSpell.userWords": [
         "achieveing",
         "appereances",
