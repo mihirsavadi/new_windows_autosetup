@@ -221,6 +221,7 @@
         @{ Key='kdenlive';    Name='Kdenlive';               Id='KDE.Kdenlive';                                                                                          Note='Video editor. NSIS installer, silent via winget; no sign-in needed.' }
         @{ Key='obs';         Name='OBS Studio';             Id='OBSProject.OBSStudio';                                                                                  Note='Recording / streaming. No sign-in needed; configure your scenes by hand.' }
         @{ Key='claudecode';  Name='Claude Code CLI';        Id='Anthropic.ClaudeCode';                                                               NeedsSignin=$true;  Note='Run  claude  in a terminal and sign in.' }
+        @{ Key='miktex';      Name='MiKTeX (LaTeX)';         Id='MiKTeX.MiKTeX';                                                                                         Note='LaTeX distribution. By default it asks before installing missing packages on the fly - enable auto-install in MiKTeX Settings if you prefer.' }
         @{ Key='python';      Name='Python 3.14';            Id='Python.Python.3.14'; Scope='machine'; Override='/quiet PrependPath=1 Include_test=0 InstallAllUsers=1'; DisableAppExecutionAlias=@('python.exe','python3.exe'); Note='Installed for all users and added to PATH (pip included). Also removes the Microsoft Store python.exe / python3.exe App Execution Alias stubs so typing "python" runs this, not the Store. Open a new terminal afterwards.' }
     )
 }
