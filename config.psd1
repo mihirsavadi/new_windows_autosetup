@@ -179,6 +179,10 @@
     #     Scope       'machine' or 'user' - only set if the package needs it
     #     InstallerType  force a specific installer, e.g. 'msi' (winget --installer-type)
     #     Override    extra args passed to the app's own installer via winget --override
+    #     PostInstall @('command args', ...) - config commands run via cmd /c after the app
+    #                 is installed (and re-applied on re-runs where it is already present).
+    #                 The session PATH is refreshed first, so just-installed exes resolve.
+    #                 Skipped in DryRun/TestRun (prints WHATIF).
     #     DisableAppExecutionAlias  @('x.exe',...) - after handling this app, delete
     #                 those Microsoft-Store alias stubs from %LOCALAPPDATA%\Microsoft\WindowsApps
     #     Offline     filename (wildcards ok) of the GUI installer to fall back to
@@ -221,7 +225,7 @@
         @{ Key='kdenlive';    Name='Kdenlive';               Id='KDE.Kdenlive';                                                                                          Note='Video editor. NSIS installer, silent via winget; no sign-in needed.' }
         @{ Key='obs';         Name='OBS Studio';             Id='OBSProject.OBSStudio';                                                                                  Note='Recording / streaming. No sign-in needed; configure your scenes by hand.' }
         @{ Key='claudecode';  Name='Claude Code CLI';        Id='Anthropic.ClaudeCode';                                                               NeedsSignin=$true;  Note='Run  claude  in a terminal and sign in.' }
-        @{ Key='miktex';      Name='MiKTeX (LaTeX)';         Id='MiKTeX.MiKTeX';                                                                                         Note='LaTeX distribution; installs silently (Basic Installer --unattended). To stop it ASKING before auto-installing missing packages, run once:  initexmf --set-config-value [MPM]AutoInstall=1' }
+        @{ Key='miktex';      Name='MiKTeX (LaTeX)';         Id='MiKTeX.MiKTeX';   PostInstall=@('initexmf --set-config-value [MPM]AutoInstall=1', 'initexmf --default-paper-size=letter');                                                              Note='LaTeX distribution, installs silently. PostInstall makes it install missing packages on-the-fly WITHOUT asking and sets US Letter default paper - so no MiKTeX Console settings needed.' }
         @{ Key='python';      Name='Python 3.14';            Id='Python.Python.3.14'; Scope='machine'; Override='/quiet PrependPath=1 Include_test=0 InstallAllUsers=1'; DisableAppExecutionAlias=@('python.exe','python3.exe'); Note='Installed for all users and added to PATH (pip included). Also removes the Microsoft Store python.exe / python3.exe App Execution Alias stubs so typing "python" runs this, not the Store. Open a new terminal afterwards.' }
     )
 }

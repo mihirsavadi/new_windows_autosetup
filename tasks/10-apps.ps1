@@ -15,8 +15,47 @@
 #  Any queued GUI installers are launched ALL AT ONCE at the end of the stage
 #  (see Start-FallbackInstallers in lib\common.ps1) for you to click through.
 #
+#  An app entry may also define  PostInstall = @('command', ...) :  config
+#  commands run via cmd /c once the app is present - after a fresh install AND
+#  again on re-runs (they should be idempotent). Used e.g. to set MiKTeX's
+#  on-the-fly package install and default paper size without any GUI.
+#
 #  Run on its own with:   .\setup.ps1 -Task apps
 # ==============================================================================
+
+# ------------------------------------------------------------------------------
+#  Refresh-SessionPath
+#  Rebuild this session's PATH from the registry (machine + user). winget
+#  installers add their bin dirs to PATH for NEW processes only; this makes
+#  just-installed executables resolvable for the PostInstall commands below.
+# ------------------------------------------------------------------------------
+function Refresh-SessionPath {
+    $machine = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
+    $user    = [System.Environment]::GetEnvironmentVariable('Path', 'User')
+    $env:Path = "$machine;$user"
+}
+
+# ------------------------------------------------------------------------------
+#  Invoke-AppPostInstall
+#  Run an app entry's PostInstall command lines via cmd /c. A nonzero exit
+#  code is logged as a warning - it never fails the whole app install.
+# ------------------------------------------------------------------------------
+function Invoke-AppPostInstall {
+    param([Parameter(Mandatory)][hashtable] $App)
+
+    if (-not $App.PostInstall) { return }
+
+    foreach ($cmd in $App.PostInstall) {
+        $cmdLine = $cmd
+        Invoke-Change ("post-install: $cmdLine") {
+            $output = & cmd.exe /c $cmdLine 2>&1
+            foreach ($line in $output) { Write-Log ("    " + "$line") 'Info' }
+            if ($LASTEXITCODE -ne 0) {
+                Write-Log ("PostInstall command failed (exit {0}) - continuing." -f $LASTEXITCODE) 'Warn'
+            }
+        }
+    }
+}
 
 $apps = $global:NWAS.Config.Apps
 Write-Log ("{0} apps in the list." -f $apps.Count) 'Info'
@@ -47,6 +86,7 @@ foreach ($app in $apps) {
     if (Test-AppInstalled -App $app) {
         Add-Result -Stage 'apps' -Item $name -Status 'Skipped' -Detail 'already installed'
         Write-Log 'Already installed - skipping.' 'Good'
+        Invoke-AppPostInstall -App $app   # idempotent config commands still re-applied
         continue
     }
 
@@ -74,6 +114,11 @@ foreach ($app in $apps) {
     if ($result.Success) {
         Add-Result -Stage 'apps' -Item $name -Status 'Installed' -Detail ("exit {0}" -f $result.ExitCode)
         Write-Log 'Installed.' 'Good'
+
+        # Pick up PATH entries the installer just wrote (new processes only),
+        # then run this app's config commands, if any.
+        if (-not $result.WhatIf) { Refresh-SessionPath }
+        Invoke-AppPostInstall -App $app
 
         if ($app.Interactive) {
             $msg = $name + '  --  ' + $(if ($app.Note) { $app.Note } else { 'finish the installer / sign-in by hand.' })
